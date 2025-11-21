@@ -1,0 +1,40 @@
+# Keil µVision build outputs
+MDK-ARM/LCD/*.axf
+MDK-ARM/LCD/*.bin
+MDK-ARM/LCD/*.hex
+MDK-ARM/LCD/*.map
+MDK-ARM/LCD/*.d
+MDK-ARM/LCD/*.o
+MDK-ARM/LCD/*.crf
+MDK-ARM/LCD/*.lst
+MDK-ARM/LCD/*.dep
+
+# Keil user settings
+*.uvguix*
+MDK-ARM/LCD.uvguix*
+
+# Build folders
+MDK-ARM/DebugConfig/
+MDK-ARM/RTE/
+
+# IDE specific
+.vscode/
+.settings/
+*.launch
+
+# OS specific
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# Temporary files
+*.tmp
+*.temp
+*.log
+*.bak
+*.old
+
+# Documentation (keep only in MemoryGame_Optimized)
+Documentatie proiect MC.docx

@@ -231,7 +231,7 @@ This project uses STMicroelectronics HAL/BSP libraries licensed under Ultimate L
 
 ## 👤 Author
 
-**Alexandra**
+**Alexandru**
 - GitHub: [@Alexrai123](https://github.com/Alexrai123)
 
 ---

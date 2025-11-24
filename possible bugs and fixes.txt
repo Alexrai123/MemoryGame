@@ -1,0 +1,90 @@
+Critical Gameplay Bugs (Game Breaking)
+The "Dead End" Win State
+
+Problem: When the player matches all pairs, the code displays "YOU WIN!" and then enters the while(1) loop indefinitely.
+
+Result: The game freezes on the victory screen. The touch screen remains active, but since all cards are "matched," touching them does nothing. The only way to replay is to press the hardware Reset button.
+
+Fix: Add logic inside the win block to wait for a user touch, then perform a software reset (NVIC_SystemReset()) or reset all game variables.
+
+Menu Touch "Fall-Through"
+
+Problem: When the user touches the menu to select a grid (e.g., 3x3), the code breaks the loop and immediately starts the game loop without waiting for the finger to be lifted.
+
+Result: The same physical touch used to click the menu button is registered instantly as the first move of the game. The card located underneath the menu button will open automatically.
+
+Fix: Add a while(TS_State.TouchDetected); loop after the menu selection to ensure the finger is lifted before the game starts.
+
+Turn "Fall-Through" (Ghost Touches)
+
+Problem: Similar to the menu bug, if the user holds their finger down on the second card of a pair while waiting for the matching delay (800ms), the next loop will instantly register that same lingering finger as the first card of the next turn.
+
+Result: The player accidentally selects the same card again immediately after a turn ends.
+
+Fix: Add a "wait for release" check at the end of the turn logic before allowing the next card selection.
+
+2. Logic & Design Errors (Game Quality)
+The Unmatchable Card (3x3 Mode)
+
+Problem: A 3x3 grid has 9 slots. The code generates 4 pairs (8 cards) and assigns the 9th card (Index 8) a value of 5.
+
+Result: This 9th card has no matching pair. It can be revealed, but it can never be cleared from the board. This confuses players who think they are missing a match.
+
+Fix: Use an even grid size (e.g., 4x2) or code the 9th card to be a "Joker" that auto-clears or is disabled.
+
+Static Game (No Randomness)
+
+Problem: The array card_values is hardcoded (1, 1, 2, 2...) and never shuffled.
+
+Result: The cards are in the exact same position every time the device is powered on. The game has zero replay value once memorized.
+
+Fix: Implement a shuffle algorithm (like Fisher-Yates) using HAL_GetTick() as a random seed to scramble the array at startup.
+
+Fragile Flag System
+
+Problem: The code uses 16 distinct boolean variables (flag1...flag16) to track game state.
+
+Result: This requires massive, repetitive if/else chains (lines 66-88). It is extremely prone to typos (e.g., checking flag4 when you meant flag5) and makes the code hard to expand or debug.
+
+Fix: Replace with a single array: bool is_matched[16];.
+
+Touch "Dead Zones"
+
+Problem: The code checks strict pixel ranges for buttons (e.g., x1 > 10 && x1 < 70 then x1 > 80...).
+
+Result: There is a 10-pixel gap between cards (pixels 70-80) where a touch registers as nothing. If a user taps slightly off-center, the game ignores it.
+
+Fix: Use contiguous boundaries. For example, if (x < 80) col=1; else if (x < 160) col=2;.
+
+Menu "Dead Line"
+
+Problem: The menu checks y1 < 160 for 3x3 and y1 > 160 for 4x4.
+
+Result: If the user touches exactly pixel row 160, neither option is selected, and the device appears unresponsive.
+
+Fix: Change one condition to be inclusive (e.g., y1 >= 160).
+
+3. Hardware & System Risks
+LCD Layer Corruption
+
+Problem: The code initializes both the LCD_BACKGROUND_LAYER and LCD_FOREGROUND_LAYER to the same memory address: LCD_FRAME_BUFFER.
+
+Result: The layers overlap perfectly in memory. Drawing on one destroys the data of the other. This defeats the purpose of layers and can cause flickering or visual artifacts.
+
+Fix: Offset the foreground layer address (e.g., LCD_FRAME_BUFFER + BufferSize) or use only one layer.
+
+System Hang on Startup (Timer Issue)
+
+Problem: The code defines HAL_TIM_PeriodElapsedCallback to increment the system tick, but it specifically checks if (htim->Instance == TIM6). However, the initialization function MX_TIM6_Init is missing (only MX_TIM1_Init is present).
+
+Result: If the STM32 HAL is configured to use TIM6 for its internal timebase (common in CubeMX), the tick will never increment. HAL_Delay() will freeze infinitely, and the board will hang immediately on boot.
+
+Fix: Ensure the timebase source is set to SysTick in the project settings, or properly initialize TIM6.
+
+Empty Error Handler
+
+Problem: The Error_Handler function is empty.
+
+Result: If the SDRAM or LCD fails to initialize (common hardware issues), the code proceeds blindly. The screen will likely stay white or black, and you will have no visual indication that the software crashed.
+
+Fix: Add a blinking LED loop inside Error_Handler so you can physically see if the initialization failed.

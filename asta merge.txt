@@ -248,12 +248,43 @@ int main(void)
 	// Draw game board
 	BSP_LCD_Clear(LCD_COLOR_WHITE);
 	BSP_LCD_SetTextColor(LCD_COLOR_RED);
-	BSP_LCD_SetFont(&Font16);
+	BSP_LCD_SetFont(&Font20);
 	
 	uint8_t desc[50];
 	BSP_LCD_DisplayStringAtLine(0, (uint8_t*)"  MEMORY GAME");
 	sprintf((char *)desc, "  Pairs: 0/%d", total_pairs);
 	BSP_LCD_DisplayStringAtLine(1, (uint8_t *)desc);
+	
+	// --- GAME PREVIEW FEATURE ---
+	// Reveal all cards
+	for(uint8_t i = 0; i < 16; i++) card_display[i] = 1;
+	
+	// Draw full board
+	if(grid_size == 3)
+	{
+		for(int r=0; r<3; r++) redraw_row(r, card_values, card_display, grid_size);
+	}
+	else
+	{
+		for(int r=0; r<4; r++) redraw_row(r, card_values, card_display, grid_size);
+	}
+	
+	// Wait 3 seconds
+	HAL_Delay(3000);
+	
+	// Hide all cards
+	for(uint8_t i = 0; i < 16; i++) card_display[i] = 0;
+	
+	// Redraw board (hidden state)
+	if(grid_size == 3)
+	{
+		for(int r=0; r<3; r++) redraw_row(r, card_values, card_display, grid_size);
+	}
+	else
+	{
+		for(int r=0; r<4; r++) redraw_row(r, card_values, card_display, grid_size);
+	}
+	// -----------------------------
 	
 	if(grid_size == 3)
 	{
@@ -375,6 +406,13 @@ int main(void)
 								is_matched[second_card] = true;
 								
 								pairs_found++;
+								
+								// Clear the line before updating text to prevent artifacts
+								BSP_LCD_SetTextColor(LCD_COLOR_WHITE);
+								BSP_LCD_FillRect(0, LINE(1), 240, 24); 
+								BSP_LCD_SetTextColor(LCD_COLOR_RED);
+								BSP_LCD_SetFont(&Font20);
+								
 								sprintf((char *)desc, "  Pairs: %d/%d", pairs_found, total_pairs);
 								BSP_LCD_DisplayStringAt(0, LINE(1), (uint8_t *)desc, LEFT_MODE);
 								
@@ -384,13 +422,14 @@ int main(void)
 									HAL_Delay(500);
 									BSP_LCD_SetTextColor(LCD_COLOR_GREEN);
 									BSP_LCD_SetFont(&Font24);
-									BSP_LCD_DisplayStringAt(0, LINE(10), (uint8_t *)"  YOU WIN!", LEFT_MODE);
+									// Move "YOU WIN" to bottom (Line 13 approx)
+									BSP_LCD_DisplayStringAt(0, 280, (uint8_t *)"  YOU WIN!", LEFT_MODE);
 									BSP_LCD_SetFont(&Font16);
 									BSP_LCD_SetTextColor(LCD_COLOR_BLACK);
 									
 									// Wait for touch to restart
 									HAL_Delay(1000);
-									BSP_LCD_DisplayStringAt(0, LINE(12), (uint8_t *)"Touch to Restart", CENTER_MODE);
+									BSP_LCD_DisplayStringAt(0, 300, (uint8_t *)"Touch to Restart", CENTER_MODE);
 									
 									// Wait for release first
 									do { BSP_TS_GetState(&TS_State); HAL_Delay(50); } while(TS_State.TouchDetected);

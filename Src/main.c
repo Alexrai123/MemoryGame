@@ -155,13 +155,15 @@ int main(void)
 			x1 = TS_State.X;
 			y1 = TS_State.Y;
 			
-			// 3x3 grid selection (upper half)
-			if(y1 > 30 && y1 < 160)
+			// 3x3 grid selection (Line 5 approx Y=80)
+			// Zone: 60 - 105
+			if(y1 >= 60 && y1 <= 105)
 			{
 				grid_size = 3;
 			}
-			// 4x4 grid selection (lower half)
-			else if(y1 >= 160 && y1 < 290)
+			// 4x4 grid selection (Line 8 approx Y=128)
+			// Zone: 110 - 155
+			else if(y1 >= 110 && y1 <= 155)
 			{
 				grid_size = 4;
 			}
@@ -169,6 +171,21 @@ int main(void)
 		}
 		HAL_Delay(50);
 	}
+	
+	// Confirmation Screen
+	BSP_LCD_Clear(LCD_COLOR_WHITE);
+	BSP_LCD_SetTextColor(LCD_COLOR_BLACK);
+	BSP_LCD_SetFont(&Font20);
+	
+	if(grid_size == 3)
+	{
+		BSP_LCD_DisplayStringAt(0, LINE(5), (uint8_t*)"Selected: 3x3", CENTER_MODE);
+	}
+	else
+	{
+		BSP_LCD_DisplayStringAt(0, LINE(5), (uint8_t*)"Selected: 4x4", CENTER_MODE);
+	}
+	HAL_Delay(1000);
 	
 	// Wait for finger release to prevent fall-through
 	do

@@ -24,14 +24,12 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "stm32f429i_discovery_lcd.h"
-#include "stm32f429i_discovery.h"
 #include "stm32f429i_discovery_sdram.h"
 #include "stm32f429i_discovery_ts.h"
 #include "stlogo.h"
 #include "usv.h"
 #include <stdio.h>
 #include <stdbool.h>
-#include <stdlib.h> // For rand() and srand()
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -119,7 +117,7 @@ int main(void)
 	printf("\n\rMemory Game - STM32F429I\n\r");
 	BSP_LCD_Init();
   BSP_LCD_LayerDefaultInit(LCD_BACKGROUND_LAYER, LCD_FRAME_BUFFER);
-	BSP_LCD_LayerDefaultInit(LCD_FOREGROUND_LAYER, LCD_FRAME_BUFFER + (BSP_LCD_GetXSize() * BSP_LCD_GetYSize() * 2));
+	BSP_LCD_LayerDefaultInit(LCD_FOREGROUND_LAYER, LCD_FRAME_BUFFER);
   BSP_LCD_SelectLayer(LCD_FOREGROUND_LAYER);
   BSP_LCD_DisplayOn();
   BSP_LCD_Clear(LCD_COLOR_BLUE);
@@ -161,7 +159,7 @@ int main(void)
 				grid_size = 3;
 			}
 			// 4x4 grid selection (lower half)
-			else if(y1 >= 160 && y1 < 290)
+			else if(y1 > 160 && y1 < 290)
 			{
 				grid_size = 4;
 			}
@@ -170,21 +168,28 @@ int main(void)
 		HAL_Delay(50);
 	}
 	
-	// Wait for finger release to prevent fall-through
-	do
-	{
-		BSP_TS_GetState(&TS_State);
-		HAL_Delay(50);
-	} while(TS_State.TouchDetected);
-	
 	// Initialize game variables based on grid size
 	uint8_t total_cards = grid_size * grid_size;
 	uint8_t total_pairs = total_cards / 2;
 	uint8_t card_values[16];
 	uint8_t card_display[16];
 	bool player1 = true;
-	bool is_matched[16];
-	for(int i=0; i<16; i++) is_matched[i] = false;
+	bool flag1 = false;
+	bool flag2 = false;
+	bool flag3 = false;
+	bool flag4 = false;
+	bool flag5 = false;
+	bool flag6 = false;
+	bool flag7 = false;
+	bool flag8 = false;
+	bool flag9 = false;
+	bool flag10 = false;
+	bool flag11 = false;
+	bool flag12 = false;
+	bool flag13 = false;
+	bool flag14 = false;
+	bool flag15 = false;
+	bool flag16 = false;
 	uint8_t first_card = 255;
 	uint8_t second_card = 255;
 	uint8_t pairs_found = 0;
@@ -211,16 +216,6 @@ int main(void)
 		card_values[10] = 6; card_values[11] = 6;
 		card_values[12] = 7; card_values[13] = 7;
 		card_values[14] = 8; card_values[15] = 8;
-	}
-	
-	// Shuffle cards (Fisher-Yates)
-	srand(HAL_GetTick()); // Seed with current tick
-	for (uint8_t i = total_cards - 1; i > 0; i--)
-	{
-		uint8_t j = rand() % (i + 1);
-		uint8_t temp = card_values[i];
-		card_values[i] = card_values[j];
-		card_values[j] = temp;
 	}
 	
 	// Initialize display state (all hidden)
@@ -271,63 +266,63 @@ int main(void)
 			
 			if(grid_size == 3)
 			{
-				// 3x3 grid touch detection (Contiguous zones)
+				// 3x3 grid touch detection
 				// Row 1
-				if(y1 > 40 && y1 < 95)
+				if(y1 > 40 && y1 < 90)
 				{
-					if(x1 < 80) touched_card = 0;
-					else if(x1 < 150) touched_card = 1;
-					else touched_card = 2;
+					if(x1 > 10 && x1 < 70) touched_card = 0;
+					else if(x1 > 80 && x1 < 140) touched_card = 1;
+					else if(x1 > 150 && x1 < 210) touched_card = 2;
 				}
 				// Row 2
-				else if(y1 >= 95 && y1 < 155)
+				else if(y1 > 100 && y1 < 150)
 				{
-					if(x1 < 80) touched_card = 3;
-					else if(x1 < 150) touched_card = 4;
-					else touched_card = 5;
+					if(x1 > 10 && x1 < 70) touched_card = 3;
+					else if(x1 > 80 && x1 < 140) touched_card = 4;
+					else if(x1 > 150 && x1 < 210) touched_card = 5;
 				}
 				// Row 3
-				else if(y1 >= 155 && y1 < 220)
+				else if(y1 > 160 && y1 < 210)
 				{
-					if(x1 < 80) touched_card = 6;
-					else if(x1 < 150) touched_card = 7;
-					else touched_card = 8;
+					if(x1 > 10 && x1 < 70) touched_card = 6;
+					else if(x1 > 80 && x1 < 140) touched_card = 7;
+					else if(x1 > 150 && x1 < 210) touched_card = 8;
 				}
 			}
 			else
 			{
-				// 4x4 grid touch detection (Contiguous zones)
+				// 4x4 grid touch detection
 				// Row 1
-				if(y1 > 40 && y1 < 95)
+				if(y1 > 40 && y1 < 90)
 				{
-					if(x1 < 60) touched_card = 0;
-					else if(x1 < 115) touched_card = 1;
-					else if(x1 < 170) touched_card = 2;
-					else touched_card = 3;
+					if(x1 > 5 && x1 < 55) touched_card = 0;
+					else if(x1 > 60 && x1 < 110) touched_card = 1;
+					else if(x1 > 115 && x1 < 165) touched_card = 2;
+					else if(x1 > 170 && x1 < 220) touched_card = 3;
 				}
 				// Row 2
-				else if(y1 >= 95 && y1 < 155)
+				else if(y1 > 100 && y1 < 150)
 				{
-					if(x1 < 60) touched_card = 4;
-					else if(x1 < 115) touched_card = 5;
-					else if(x1 < 170) touched_card = 6;
-					else touched_card = 7;
+					if(x1 > 5 && x1 < 55) touched_card = 4;
+					else if(x1 > 60 && x1 < 110) touched_card = 5;
+					else if(x1 > 115 && x1 < 165) touched_card = 6;
+					else if(x1 > 170 && x1 < 220) touched_card = 7;
 				}
 				// Row 3
-				else if(y1 >= 155 && y1 < 215)
+				else if(y1 > 160 && y1 < 210)
 				{
-					if(x1 < 60) touched_card = 8;
-					else if(x1 < 115) touched_card = 9;
-					else if(x1 < 170) touched_card = 10;
-					else touched_card = 11;
+					if(x1 > 5 && x1 < 55) touched_card = 8;
+					else if(x1 > 60 && x1 < 110) touched_card = 9;
+					else if(x1 > 115 && x1 < 165) touched_card = 10;
+					else if(x1 > 170 && x1 < 220) touched_card = 11;
 				}
 				// Row 4
-				else if(y1 >= 215 && y1 < 280)
+				else if(y1 > 220 && y1 < 270)
 				{
-					if(x1 < 60) touched_card = 12;
-					else if(x1 < 115) touched_card = 13;
-					else if(x1 < 170) touched_card = 14;
-					else touched_card = 15;
+					if(x1 > 5 && x1 < 55) touched_card = 12;
+					else if(x1 > 60 && x1 < 110) touched_card = 13;
+					else if(x1 > 115 && x1 < 165) touched_card = 14;
+					else if(x1 > 170 && x1 < 220) touched_card = 15;
 				}
 			}
 			
@@ -337,20 +332,25 @@ int main(void)
 				bool card_already_matched = false;
 				
 				// Check if card already matched
-				if(is_matched[touched_card]) card_already_matched = true;
+				if(touched_card == 0 && flag1) card_already_matched = true;
+				if(touched_card == 1 && flag2) card_already_matched = true;
+				if(touched_card == 2 && flag3) card_already_matched = true;
+				if(touched_card == 3 && flag4) card_already_matched = true;
+				if(touched_card == 4 && flag5) card_already_matched = true;
+				if(touched_card == 5 && flag6) card_already_matched = true;
+				if(touched_card == 6 && flag7) card_already_matched = true;
+				if(touched_card == 7 && flag8) card_already_matched = true;
+				if(touched_card == 8 && flag9) card_already_matched = true;
+				if(touched_card == 9 && flag10) card_already_matched = true;
+				if(touched_card == 10 && flag11) card_already_matched = true;
+				if(touched_card == 11 && flag12) card_already_matched = true;
+				if(touched_card == 12 && flag13) card_already_matched = true;
+				if(touched_card == 13 && flag14) card_already_matched = true;
+				if(touched_card == 14 && flag15) card_already_matched = true;
+				if(touched_card == 15 && flag16) card_already_matched = true;
 				
 				if(!card_already_matched)
 				{
-					// Handle 3x3 Bonus Card (Index 8)
-					if(grid_size == 3 && touched_card == 8)
-					{
-						card_display[8] = 1;
-						is_matched[8] = true;
-						redraw_row(2, card_values, card_display, grid_size);
-						// Do not count as a pair, just reveal it
-						continue; // Skip the rest of the loop
-					}
-					
 					if(player1 == true)
 					{
 						// First card selection
@@ -382,8 +382,39 @@ int main(void)
 							if(card_values[first_card] == card_values[second_card])
 							{
 								// Match! Set flags
-								is_matched[first_card] = true;
-								is_matched[second_card] = true;
+								if(first_card == 0) flag1 = true;
+								if(first_card == 1) flag2 = true;
+								if(first_card == 2) flag3 = true;
+								if(first_card == 3) flag4 = true;
+								if(first_card == 4) flag5 = true;
+								if(first_card == 5) flag6 = true;
+								if(first_card == 6) flag7 = true;
+								if(first_card == 7) flag8 = true;
+								if(first_card == 8) flag9 = true;
+								if(first_card == 9) flag10 = true;
+								if(first_card == 10) flag11 = true;
+								if(first_card == 11) flag12 = true;
+								if(first_card == 12) flag13 = true;
+								if(first_card == 13) flag14 = true;
+								if(first_card == 14) flag15 = true;
+								if(first_card == 15) flag16 = true;
+								
+								if(second_card == 0) flag1 = true;
+								if(second_card == 1) flag2 = true;
+								if(second_card == 2) flag3 = true;
+								if(second_card == 3) flag4 = true;
+								if(second_card == 4) flag5 = true;
+								if(second_card == 5) flag6 = true;
+								if(second_card == 6) flag7 = true;
+								if(second_card == 7) flag8 = true;
+								if(second_card == 8) flag9 = true;
+								if(second_card == 9) flag10 = true;
+								if(second_card == 10) flag11 = true;
+								if(second_card == 11) flag12 = true;
+								if(second_card == 12) flag13 = true;
+								if(second_card == 13) flag14 = true;
+								if(second_card == 14) flag15 = true;
+								if(second_card == 15) flag16 = true;
 								
 								pairs_found++;
 								sprintf((char *)desc, "  Pairs: %d/%d", pairs_found, total_pairs);
@@ -398,18 +429,6 @@ int main(void)
 									BSP_LCD_DisplayStringAt(0, LINE(10), (uint8_t *)"  YOU WIN!", LEFT_MODE);
 									BSP_LCD_SetFont(&Font16);
 									BSP_LCD_SetTextColor(LCD_COLOR_BLACK);
-									
-									// Wait for touch to restart
-									HAL_Delay(1000);
-									BSP_LCD_DisplayStringAt(0, LINE(12), (uint8_t *)"Touch to Restart", CENTER_MODE);
-									
-									// Wait for release first
-									do { BSP_TS_GetState(&TS_State); HAL_Delay(50); } while(TS_State.TouchDetected);
-									
-									// Wait for new touch
-									do { BSP_TS_GetState(&TS_State); HAL_Delay(50); } while(!TS_State.TouchDetected);
-									
-									NVIC_SystemReset();
 								}
 							}
 							else
@@ -432,13 +451,6 @@ int main(void)
 							first_card = 255;
 							second_card = 255;
 							player1 = true;
-							
-							// Wait for finger release to prevent ghost touches
-							do
-							{
-								BSP_TS_GetState(&TS_State);
-								HAL_Delay(50);
-							} while(TS_State.TouchDetected);
 						}
 					}
 				}
@@ -993,12 +1005,6 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 	{
     HAL_IncTick();
   }
-	else
-	{
-		// Fallback or if SysTick is used directly, this might not be needed
-		// But to be safe against the "hang" issue if TIM6 isn't init:
-		HAL_IncTick(); 
-	}
   /* USER CODE BEGIN Callback 1 */
   /* USER CODE END Callback 1 */
 }
@@ -1011,11 +1017,6 @@ void Error_Handler(void)
 {
   /* USER CODE BEGIN Error_Handler_Debug */
   /* User can add his own implementation to report the HAL error return state */
-	while(1)
-	{
-		BSP_LED_Toggle(LED3);
-		HAL_Delay(100);
-	}
   /* USER CODE END Error_Handler_Debug */
 }
 
